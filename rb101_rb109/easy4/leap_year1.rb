@@ -17,7 +17,7 @@ end
 
 
 def testing(test_examples)
-  test_examples.each do |example|
+  test_examples.map do |example|
     puts leap_year?(example)
   end  
 end
