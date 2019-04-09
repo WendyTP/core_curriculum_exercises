@@ -1,0 +1,9 @@
+# Editor temp files #
+#####################
+.vscode
+
+# local files for test purpose #
+#####################
+test*
+
+
