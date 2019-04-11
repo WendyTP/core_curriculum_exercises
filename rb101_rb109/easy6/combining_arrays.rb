@@ -11,7 +11,7 @@ algorithm:
     - only insert the elements that are not in merged_array
   - return merged_array  
 =end
-
+#first attempt
 def merge(arr1, arr2)
   merged_array = []
   arr1.each do |element|
@@ -23,4 +23,15 @@ def merge(arr1, arr2)
   merged_array
 end
 
-p merge([1,3,5],[3,6,9])
+# possible solution -- using Array#union (or Array#|) --> to combine 2 arrays and delete the duplicates, without mutation
+=begin
+def merge(arr1,arr2)
+  arr1.union(arr2)
+end
+=end
+
+array1 = [1,3,5]
+array2 = [3,6,9]
+p merge(array1, array2)
+
+p array1

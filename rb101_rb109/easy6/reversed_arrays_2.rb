@@ -7,6 +7,7 @@ rules:
   - do not modify the original array
 =end
 
+#first attempt
 def reverse(arr)
   reversed_array = []
   arr.each do |element|
@@ -14,6 +15,15 @@ def reverse(arr)
   end
   reversed_array
 end
+
+# possible solution -- using each_with_object
+=begin
+def reverse(arr)
+  arr.each_with_object([]) do |element, new_array|
+    new_array.prepend(element)
+  end
+end    
+=end   
 
 p reverse([1,2,3,4])
 

@@ -14,11 +14,19 @@ algorithm:
   - return the array
 =end
 
+# first attempt
 def remove_vowels(array_strings)
   array_strings.map do |string|
     string.gsub(/[aeiouAEIOU]/,"")
   end
 end
+
+# possible solution
+=begin
+def remove_vowels(strings)
+  strings.map {|string| string.delete('aeiouAEIOU')}
+end
+=end
 
 p remove_vowels(%w(abcdefghijklmnopqrstuvwxyz))
 p remove_vowels(%w(green YELLOW black white))

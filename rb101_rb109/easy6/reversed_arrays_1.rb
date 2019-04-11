@@ -15,6 +15,7 @@ algorithm:
   - return the updated given array 
 =end
 
+# first attempt
 def reverse!(arr)
   temp_reversed_array = []
   arr.each do |element|
@@ -30,6 +31,20 @@ def reverse!(arr)
   arr
 end
 
+# possible solution - swaping values of either side of indexes
+=begin
+def reverse!(arr)
+  left_index = 0
+  right_index = -1
+  arr.map do |element|
+    arr[left_index], arr[right_index] = arr[right_index], arr[left_index]
+    left_index += 1
+    right_index -= 1
+    break if left_index >= arr.length / 2
+  end
+  arr
+end    
+=end
 list = [1,2,3,4]
 result = reverse!(list)
 p result

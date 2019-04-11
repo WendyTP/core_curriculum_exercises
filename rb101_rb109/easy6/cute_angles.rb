@@ -11,13 +11,8 @@ rules:
 - data : number  
 =end
 
-DEGREE = "\xC2\xB0"
-
-
-
-
 # first attempt -- work for both positive and negative floats
-
+DEGREE = "\xC2\xB0"
 
 def angles(num)
 degree = num.to_i
