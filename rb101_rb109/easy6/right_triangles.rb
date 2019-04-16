@@ -14,6 +14,7 @@ algorithm:
     - counter += 1  
 =end
 
+# first attempt
 def triangle(n)
   counter = 1
   while counter <= n
@@ -24,6 +25,21 @@ def triangle(n)
     counter += 1
   end
 end
+
+
+# other solution - similar to mine
+=begin
+def triangle(num)
+  spaces = num - 1
+  stars = 1
+
+  num.times do |n|
+    puts (' ' * spaces) + ('*' * stars)
+    spaces -= 1
+    stars += 1
+  end
+end
+=end
 
 p triangle(5)
 puts triangle(9)

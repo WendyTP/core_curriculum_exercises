@@ -17,6 +17,19 @@ def include?(arr, search_value)
   selected_items.length > 0
 end
 
+# another solution -- Array#find_index
+=begin
+def include?(arr, search_value)
+  !!arr.find_index(search_value)
+end
+
+# using each method
+def include?(array,value)
+  array.each {|element| return true if element == value}
+  false
+end  
+=end
+
 p include?([1,2,3,4,5],3)
 p include?([1,2,3,4,5], 6)
 p include?([], 3)

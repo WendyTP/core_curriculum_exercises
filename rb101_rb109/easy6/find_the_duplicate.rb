@@ -27,6 +27,13 @@ def find_dup(arr)
   comparing_element
 end
 
+# another solution
+=begin
+def find_dup(array)
+  array.find {|element| array.count(element) == 2}
+end
+=end
+
 p find_dup([1,5,3,1])
 p find_dup(["a","b","c","a"])
 p find_dup([1,5,3,3])
