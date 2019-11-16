@@ -28,6 +28,9 @@ example:
  4 / 2 => 2 ..0
  2 / 2 => 1 ..0 
  1/ 2 => 0 ..1  (stop iterate)
+
+ * Integer.to_s(2) ==> "1001" (a binary in string form)
+ * Integer.to_s(10) ==> "#{Integer}"
 =end
 
   class SecretHandshake
