@@ -41,7 +41,7 @@ example:
      if input.is_a?(Integer)
       @decimal_num = input
      elsif valid_string?(input)
-      @binaries = input.each_char.map(&:to_i)
+      @binaries = string_to_binary(input)
      else
       @decimal_num = 0
      end
