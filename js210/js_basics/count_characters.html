@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<!--comments in here-->
+<html lang="en">
+  <head>
+    <title>Count the number of characters</title>
+    <meta charset="utf-8" />
+  </head>
+
+  <body>
+    <script>
+      console.log('Please enter a phrase:');
+      let word = prompt();
+      let regex = /\s/;
+      let nonSpaceCharacter = word.replace(regex, '');
+      let alphanumeric = nonSpaceCharacter.replace(/[^0-9a-z]/gi, '')
+      console.log(`There are ${alphanumeric.length} characters in ${word}.`);
+
+    </script>
+  </body>
+</html>
