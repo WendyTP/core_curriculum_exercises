@@ -24,3 +24,6 @@ console.log(aa === cc)  // false
 
 let dd = {c: 1, d: 2}
 console.log(objectsEqual(aa, dd))   // false
+
+
+
