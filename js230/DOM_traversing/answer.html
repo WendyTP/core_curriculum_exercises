@@ -1,0 +1,25 @@
+<div><p>Then press the <em>Draw</em> button.</p></div>
+
+function childNodes(nodeId) {
+  let parentNode = document.getElementById(String(nodeId));
+  let result = [];
+  let directChildNodesCount = countDirectChildNodes(parentNode);
+  result.push(directChildNodesCount);
+  let indirectCount = 0;
+  for (let idx = 0; idx < directChildNodesCount; idx += 1) {
+      indirectCount += countDirectChildNodes(parentNode.childNodes[idx]);
+  }
+  result.push(indirectCount);
+  return result;
+}
+
+function countDirectChildNodes(node) {
+  return Array.prototype.slice.call(node.childNodes).length;
+}
+
+function walk(node) {
+  for (let idx = 0; idx < node.childNodes.length; idx += 1) {
+      count += 1
+      walk(node.childNodes[idx])
+  }
+}
