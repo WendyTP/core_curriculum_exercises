@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Add more schedules</title>
+    <style>
+    
+      form {
+        padding: 10px;
+      }
+
+      fieldset {
+        border: solid 2px #ddd;
+      }
+
+      label {
+        font-weight: bold;
+        color: #f0595b;
+      }
+
+      label::after {
+        content: ":";
+      }
+
+     
+      input[type="submit"] {
+        width: 100px;
+        height: 50px;
+        color: #fff;
+        background-color: crimson;
+        border-radius: 5px;
+        border-color: #f0595b;
+      }
+
+      button {
+        width: 100px;
+        height: 50px;
+        color: #fff;
+        background-color: #448adb;
+        border-radius: 5px;
+        border-color: #8dbbf0;
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+ 
+    <button class='createSchedule' type='button'>
+      Add more schedules
+    </button>
+    <form action='/api/schedules' method="POST">
+      <div id='schedules'>
+        <fieldset>
+          <label for='staffName' >
+            Staff Name:
+          <select name="staffName"></select>
+          </label>
+
+          <label for='date'>Date</label>
+          <input type="date" id='date' name='date'/>
+
+          <label for='time'>Time</label>
+          <input type="time" id='time' name='time'>
+        </fieldset>
+      </div>
+
+    
+        <input type="submit" value="Submit" id='submit'/>
+    </form>
+  </body>
+  <script>
+
+    function createLegendWithScheduleNumber(scheduleNumber) {
+      let scheduleField = document.getElementById(`schedule_${scheduleCount}`);
+      let legend = document.createElement('legend')
+      scheduleField.appendChild(legend);
+      legend.textContent = `Schedule ${scheduleNumber}`;
+    }
+
+    function addStaffNamesToSelect(staffMembers, scheduleNumber) {
+      let selectIdx = scheduleNumber - 1;
+      let select = document.querySelectorAll('select')[selectIdx];
+      staffMembers.forEach(staff => {
+        let option = document.createElement('option');
+        option.value = staff['id'];
+        option.textContent = staff['name'];
+        select.appendChild(option);
+      })
+    }
+
+    function changeLegendScheduleNumber(scheduleNumber) {
+      let legendIdx = scheduleNumber - 1;
+      let legend = document.querySelectorAll('legend')[legendIdx];
+      legend.textContent = `Schedule ${scheduleNumber}`;
+    }
+
+    function changeFieldSetScheduleNumber(scheduleNumber) {
+      let fieldSetIdx = scheduleNumber - 1;
+      let fieldSet = document.querySelectorAll('fieldset')[fieldSetIdx];
+      fieldSet.id = `schedule_${scheduleNumber}`;
+    }
+
+    function formInputsToJson(data) {
+
+    }
+
+
+   
+
+    // create first schedule form during page load for the first time
+    let form = document.querySelector('form');
+    let staffs = [];
+    let scheduleCount = 1;
+    let firstFieldSet = document.querySelector('fieldset');
+    firstFieldSet.id = `schedule_${scheduleCount}`;
+    createLegendWithScheduleNumber(scheduleCount);
+
+
+    (function(){
+      let requestStaff = new XMLHttpRequest();
+      requestStaff.open('GET', '/api/staff_members');
+      requestStaff.send();
+
+      requestStaff.addEventListener('load', event => {
+        staffs = JSON.parse(requestStaff.response);
+        addStaffNamesToSelect(staffs, scheduleCount);
+      });
+    })();
+
+     // create new schedule form
+    let fieldset = document.querySelector('fieldset')
+    let templateForm = fieldset.cloneNode(true);
+    let div = document.getElementById('schedules');
+    let button = document.querySelector('button');
+
+    button.addEventListener('click', event => {
+      let newForm = templateForm.cloneNode(true);
+      
+      div.appendChild(newForm);
+      scheduleCount += 1;
+      addStaffNamesToSelect(staffs, scheduleCount);
+      changeLegendScheduleNumber(scheduleCount);
+      changeFieldSetScheduleNumber(scheduleCount)
+    });
+
+    /* 
+    {
+        "schedules": [{"staff_id": 1, "date": "10-10-10", "time": "12:12"}]
+     }
+   */
+    function formInputsToJson(data, scheduleCount) {
+      let json = [];
+      let arr = [];
+      
+      for (let pair of data.entries()) {
+        arr.push(pair);
+      };
+
+      for (let i = 0; i < scheduleCount; i += 1) {
+        let schedule = {};
+        schedule.staff_id = arr.shift()[1];
+        schedule.date = arr.shift()[1];
+        schedule.time = arr.shift()[1];
+        json.push(schedule);
+      }
+
+      return {schedules: json};
+    }
+
+
+    // submit form
+    let submitButton = document.getElementById('submit');
+    form.addEventListener('submit', event => {
+      event.preventDefault();
+      let data = new FormData(form);
+      let json = JSON.stringify(formInputsToJson(data, scheduleCount));
+
+      
+      let request = new XMLHttpRequest();
+      request.open('POST', form.action);
+      request.setRequestHeader('Content-Type', 'application/json');
+      
+      request.addEventListener('load', () => {
+        if (request.status === 201) {
+        alert('Schedules added');
+        form.reset();
+      } else if (request.status === 400) {
+        alert(request.responseText);
+      }
+      });
+      
+      request.send(json);
+    });
+
+
+   
+   
+    
+  </script>
+</html>

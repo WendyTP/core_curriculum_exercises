@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <style>
+      li {
+        list-style-type: disc;
+      }
+
+      li li {
+        list-style-type: circle;
+      }
+
+      #bookings > li {
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Bookings</h1>
+    <ul id='bookings'>
+    </ul>
+
+    <script>
+      /*
+      - get all bookings
+        - add bookings to ul : 
+          - each booking date is a list (showing date)
+          - make the list to be a link 
+      - when a bookigng date is clicked:
+        - iterate through the returned nested array (bookings with detail)
+          - create a list of each array (with name, email, time)
+      */
+     
+      function renderBookingDetails(target, allData) {
+        let ul = document.createElement('ul');
+        
+        let dataStrings = allData.map(bookingInfo => {
+          return `${bookingInfo[0]} | ${bookingInfo[1]} | ${bookingInfo[2]}`;
+        });
+
+        dataStrings.forEach(dataString => {
+          let li = document.createElement('li');
+          li.textContent = dataString;
+          ul.appendChild(li);
+        })
+        target.appendChild(ul);
+      }
+      
+      let ul = document.querySelector('ul');
+
+     (function() {
+       let request = new XMLHttpRequest();
+       request.open('GET', '/api/bookings');
+       request.responseType = 'json';
+       request.addEventListener('load', event => {
+         let dates = request.response;
+         dates.forEach(date => {
+           let li = document.createElement('li');
+           li.textContent = date;
+           ul.appendChild(li);
+         })
+       });
+       request.send();
+     })();
+
+     ul.addEventListener('click', event => {
+       let li = event.target;
+       if (li.tagName === 'LI') {
+         if (li.childElementCount === 0) {
+           let request = new XMLHttpRequest();
+           request.open('GET', `/api/bookings/${li.textContent}`);
+           request.responseType = 'json';
+           request.send();
+
+           request.addEventListener('load', event => {
+             let allBookingsOfGivenDate = request.response;
+             renderBookingDetails(li, allBookingsOfGivenDate);
+           });
+         }
+       }
+     });
+
+    </script>
+  </body>
+</html>

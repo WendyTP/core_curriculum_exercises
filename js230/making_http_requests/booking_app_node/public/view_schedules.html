@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <title>View all schedules</title>
+    <script>
+      function retrieveSchedules() {
+        let request = new XMLHttpRequest();
+        request.open('GET', 'http://localhost:3000/api/schedules');
+        request.responseType = 'json';
+
+        request.timeout = 5000;
+
+        request.addEventListener('timeout', event => {
+          alert('please try again');
+        });
+
+        request.addEventListener('load', event => {
+        let totalSchedules = request.response;
+        if (totalSchedules.length > 0) {
+          let tallyResult = {};
+
+          totalSchedules.forEach(sche => {
+            if (!tallyResult[`staff ${sche['staff_id']}`]) {
+              tallyResult[`staff ${sche['staff_id']}`] = 1;
+            } else {
+              tallyResult[`staff ${sche['staff_id']}`] += 1;
+            }
+          });
+
+          alert(JSON.stringify(tallyResult));
+        } else {
+          alert('there are currently no schedules available for booking');
+        }
+      });
+
+
+
+        request.addEventListener('loadend', event => {
+          alert('the request is completed');
+        });
+        
+        request.send();
+      }
+
+      retrieveSchedules();
+
+
+     
+    </script>
+  </head>
+</html>

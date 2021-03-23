@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <title> exercise2</title>
+    <style>
+      fieldset {
+        border: none;
+      }
+
+      div {
+        width: 800px;
+        border: solid 2px #ddd;
+      }
+
+      label {
+        font-weight: bold;
+        color: #f0595b;
+      }
+
+      label::after {
+        content: ":";
+      }
+
+      input[type="submit"] {
+        width: 100px;
+        height: 50px;
+        color: #fff;
+        background-color: crimson;
+        border-radius: 5px;
+        border-color: #f0595b;
+      }
+    </style>
+  </head>
+  <body>
+    <form action="api/staff_members" method="post">
+      <div>
+        <fieldset>
+          <label for='name'>Name</label>
+          <input type='text' id='name' name='name'/>
+        </fieldset>
+  
+        <fieldset>
+          <label for='email'>Email</label>
+          <input type="text" id='email' name='email'/>
+        </fieldset>
+      </div>
+      
+
+      <fieldset>
+        <input type='submit' value="Submit" class='submit'/>
+      </fieldset>
+    </form>
+
+    <script>
+      
+      let form = document.querySelector('form');
+
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        let formData = new FormData(form);
+        let request = new XMLHttpRequest();
+        request.open('POST', form.action);
+        request.send(formData);
+
+        request.addEventListener('load', event => {
+          switch(request.status) {
+            case 201:
+              let res = JSON.parse(request.response);
+              alert(`Successfully created staft with id: ${res.id}`);
+              form.reset();
+              break;
+            case 400:
+              alert(request.responseText);
+          }
+        });
+      });
+    </script>
+
+  </body>
+</html>

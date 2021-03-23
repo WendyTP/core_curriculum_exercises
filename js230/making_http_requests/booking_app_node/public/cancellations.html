@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <title>Cancel Booking or Schedule</title>
+    <script>
+      // a schedule can only be canceled if student_email is null (no booking)
+      function staffCancelSchedule(scheduleId) {
+        let request = new XMLHttpRequest();
+        request.open('DELETE', `/api/schedules/${scheduleId}`);
+        request.send();
+
+        request.addEventListener('load', event => {
+          if (request.status === 204) {
+            alert('schedule deleted');
+            window.location.href = '/cancellations.html';
+          } else {
+            alert(`Deletion failed: ${request.responseText}`);
+          }
+        });
+      }
+
+      // a booking is a schedule with student_email not null
+      function studentCancelBooking(bookingId) {
+        let request = new XMLHttpRequest();
+        request.open('PUT', `/api/bookings/${bookingId}`);
+        request.send();
+
+        request.addEventListener('load', event => {
+          if (request.status === 204) {
+            alert('booking deleted');
+            window.location.href = '/cancellations.html';
+          } else {
+            alert(`Deletion failed: ${request.responseText}`);
+          }
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <form id='cancelBooking'>
+      <label for='bookingId'>Cancel Booking</label>
+      <select id='bookingId' name='bookingId'></select>
+      <input id='bookingCancelButton' type="submit">
+    </form>
+
+    <form id='cancelSchedule'>
+      <label for='scheduleId'>Cancel Schedule</label>
+      <select id='scheduleId' name='scheduleId'></select>
+      <input id='scheduleCancelButton' type='submit'>
+    </form>
+
+    <script>
+      /*
+      - get all available schedules
+        - get all staff_members
+        - transform staff_id to staff_names of all schedules
+        - iterate through each schedule:
+          - - retrieve needed info from each transformed schedules
+          - add staff_id to option value
+          - populate schedules to both booking select and schedule select 
+      - if the bookingCancel button is clicked, then fire cancelSchedule method
+      - if the scheduleCancel button is clicked, then fire cancelSchedule method
+      - 
+      */
+
+      function convertStaffIdToStaffName(schedules, staff) {
+        function getStaffName(id, staff) {
+          return staff.filter(member => {
+            return member['id'] === id;
+          })[0]['name'];
+        }
+
+
+        schedules.forEach(schedule => {
+          schedule['staff_id'] = getStaffName(schedule['staff_id'], staff);
+        })
+
+        return schedules;
+      }
+
+      function createDataLists(schedules, selectBookings, selectSchedules) {
+        schedules.forEach(schedule => {
+          let info = [schedule.staff_id,schedule.date, schedule.time];
+          let option = document.createElement('option');
+          option.textContent = info.join(' | ');
+          option.setAttribute('value', schedule.id);
+
+          if (schedule['student_email']) {
+            selectBookings.appendChild(option);
+          } else {
+            selectSchedules.appendChild(option);
+          }
+        });
+      }
+
+      let cancelBookingForm = document.getElementById('cancelBooking');
+      let selectBookings = cancelBookingForm.querySelector('select');
+ 
+      let cancelScheduleForm = document.getElementById('cancelSchedule');
+      let selectSchedules = cancelScheduleForm.querySelector('select');
+
+      (function() {
+        let request = new XMLHttpRequest();
+        request.open('GET', '/api/schedules');
+        request.responseType = 'json';
+        request.send();
+
+        request.addEventListener('load', event => {
+          let staffs;
+          let schedules = request.response;
+
+          (function() {
+            let request = new XMLHttpRequest();
+            request.open('GET', '/api/staff_members');
+            request.responseType = 'json';
+            request.send();
+
+            request.addEventListener('load', event => {
+              staff = request.response;
+
+              schedules = convertStaffIdToStaffName(schedules, staff);
+            
+              createDataLists(schedules, selectBookings, selectSchedules);
+            });
+          })();
+        });
+      })();
+
+      cancelBookingForm.addEventListener('submit', event => {
+        event.preventDefault();
+        studentCancelBooking(selectBookings.value);
+      })
+
+      cancelScheduleForm.addEventListener('submit', event => {
+        event.preventDefault();
+        staffCancelSchedule(selectSchedules.value);
+      })
+    </script>
+  </body>
+</html>

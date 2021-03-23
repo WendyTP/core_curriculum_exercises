@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <title>Book a time slot</title>
+    <style>
+      #newStudentForm {
+        background-color: lightsteelblue;
+
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Schedules</h1>
+    <form action="/api/bookings" method='post'>
+      <label for='id'>Please select one schedule</label>
+      <select id='id' name='id'>
+      </select>
+      <br>
+      <label for='student_email'>Email:</label>
+      <input type='email' name='student_email' id='student_email' required>
+      <input id=submitButton type="submit">
+    </form>
+    <script>
+      /*
+      // retrive all schedules, then filter to get the ones student_email === null
+      // retrieve all staff info
+      // transform filtered list to change staff id to staff name 
+       
+      // iterate through filtered list:
+       add staff name to select option with time and date (as display text)
+       value of each option will be the the id of a schedule
+      //
+     
+      
+      // submit booking:
+        // if not 204 (student not registered):
+        create an inserted new student form (email, name and booking ref)
+        get the booking sequence of the server response
+
+        //  submit student register form:
+        submit student form, then the schedule form
+
+      */
+      let form = document.querySelector('form');
+      let schedules;
+
+      function convertStaffIdToStaffName(schedules, staff) {
+        function getStaffName(staffId, staff) {
+          return staff.filter(member => {
+            return member['id'] === staffId;
+          })[0].name;
+        }
+
+        schedules.forEach(schedule => {
+          schedule['staff_id'] = getStaffName(schedule['staff_id'], staff);
+        });
+
+        return schedules;
+      }
+
+      function addOptionsToSelectList(schedules) {
+        let select = document.querySelector('select');
+        schedules.forEach(schedule => {
+          let option = document.createElement('option');
+          option.setAttribute('value', schedule['id']);
+          option.textContent = `${schedule['staff_id']} | ${schedule['date']} | ${schedule['time']}`;
+          select.appendChild(option);
+        });
+      }
+      // get schedules and add to select list
+      (function() {
+        let request = new XMLHttpRequest();
+        request.open('GET', '/api/schedules');
+        request.responseType = 'json';
+        request.send();
+
+        request.addEventListener('load', event => {
+          schedules = request.response;
+          schedules = schedules.filter(schedule => {
+            return !schedule['student_email'];
+          });
+
+          let staff;
+
+          (function() {
+            let request = new XMLHttpRequest();
+            request.open('GET', '/api/staff_members' );
+            request.responseType ='json';
+            request.send();
+            
+            request.addEventListener('load', event => {
+              staff = request.response;
+              schedules = convertStaffIdToStaffName(schedules, staff);
+              addOptionsToSelectList(schedules);
+            });
+          })();
+        });
+      })();
+
+      function formDataToJson(formData) {
+        let json = {};
+        for (let pair of formData.entries()) {
+          json[pair[0]] = pair[1];
+        }
+
+        return json;
+      }
+
+      function displayStudentRegisterForm(email, bookingSequence) {
+        let newStudentForm = document.createElement('form');
+        newStudentForm.setAttribute('id', 'newStudentForm');
+        newStudentForm.setAttribute('action', '/api/students' );
+        newStudentForm.setAttribute('method', 'post');
+
+        let h1 = document.createElement('h1');
+        h1.textContent = 'Please provide new student details'
+        newStudentForm.appendChild(h1);
+
+        let emailLabel = document.createElement('label');
+        emailLabel.setAttribute('for', 'email');
+        emailLabel.textContent = 'Email:';
+        newStudentForm.appendChild(emailLabel);
+
+        let emailInput = document.createElement('input');
+        emailInput.setAttribute('type', 'email');
+        emailInput.setAttribute('name', 'email');
+        emailInput.setAttribute('id', 'email');
+        emailInput.setAttribute('value', email);
+        newStudentForm.appendChild(emailInput);
+        newStudentForm.appendChild(document.createElement('br'));
+
+        let nameLabel = document.createElement('label');
+        nameLabel.setAttribute('for', 'name');
+        nameLabel.textContent = 'Name:';
+        newStudentForm.appendChild(nameLabel);
+
+        let nameInput = document.createElement('input');
+        nameInput.setAttribute('type', 'text');
+        nameInput.setAttribute('name', 'name');
+        nameInput.setAttribute('id', 'name');
+        newStudentForm.appendChild(nameInput);
+        newStudentForm.appendChild(document.createElement('br'));
+
+
+        let bookingSeqLabel = document.createElement('label');
+        bookingSeqLabel.setAttribute('for', 'booking_sequence');
+        bookingSeqLabel.textContent = 'Booking Sequence:';
+        newStudentForm.appendChild(bookingSeqLabel);
+
+        let bookingSeqInput = document.createElement('input');
+        bookingSeqInput.setAttribute('type', 'text');
+        bookingSeqInput.setAttribute('name', 'booking_sequence');
+        bookingSeqInput.setAttribute('id', 'booking_sequence');
+        bookingSeqInput.setAttribute('value', bookingSequence);
+        newStudentForm.appendChild(bookingSeqInput);
+        newStudentForm.appendChild(document.createElement('br'));
+
+        let studentFormSubmit = document.createElement('input');
+        studentFormSubmit.setAttribute('id', 'studentFormSubmitButton');
+        studentFormSubmit.setAttribute('type', 'submit');
+        newStudentForm.appendChild(studentFormSubmit);
+
+        document.querySelector('body').appendChild(newStudentForm);
+      }
+
+      // submit booking form
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        let formData = new FormData(form);
+        let json = JSON.stringify(formDataToJson(formData));
+        let request = new XMLHttpRequest();
+
+        request.open('POST', form.action);
+        request.setRequestHeader('Content-Type', 'application/json');
+        request.send(json);
+
+        request.addEventListener('load', event => {
+          switch (request.status) {
+            case 204:
+              alert('Booked');
+              window.location.href = '/form_booking.html'   // reload page
+              break;
+            case 404:
+              // `Student does not exist; booking_sequence: ${sequence}`
+              //alert(request.responseText);
+              let booking_sequence = request.responseText.split(':')[1].trim();
+              displayStudentRegisterForm(form['student_email'].value, booking_sequence);
+              
+              let newStudentForm = document.getElementById('newStudentForm');
+              newStudentForm.addEventListener('submit', event => {
+                event.preventDefault();
+                let studentRegRequest = new XMLHttpRequest();
+                let studentData = new FormData(newStudentForm);
+                let studentJson = JSON.stringify(formDataToJson(studentData)); 
+
+                studentRegRequest.open('POST', newStudentForm.action);
+                studentRegRequest.setRequestHeader('Content-Type', 'application/json');
+                studentRegRequest.send(studentJson);
+
+                studentRegRequest.addEventListener('load', event => {
+                  alert(studentRegRequest.responseText);
+                  if (studentRegRequest.status === 201) {
+                    newStudentForm.reset();
+
+                    let request3 = new XMLHttpRequest();
+                    request3.open('POST', form.action);
+                    request3.setRequestHeader('Content-Type', 'application/json');
+                    request3.send(json);
+                     request3.addEventListener('load', event => {
+                       if (request3.status === 204) {
+                         alert('Booked');
+                       }
+                     });
+                  }
+                });
+              });
+          }
+        });
+
+      });
+
+      
+
+
+    </script>
+  </body>
+</html>
