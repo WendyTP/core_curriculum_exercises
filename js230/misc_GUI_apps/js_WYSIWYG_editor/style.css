@@ -1,0 +1,45 @@
+body {
+  background: #307fa5c9;
+}
+
+h1 {
+  color: #fff;
+  text-align: center;
+}
+
+#editor {
+  width: 800px;
+  height: 500px;
+  border: 1px solid white;
+  margin: 0 auto;
+}
+
+.buttons {
+  height: 50px;
+  border-bottom: 1px solid white;
+  padding: 5px;
+  box-sizing: border-box;
+  background: #b5d8e5d9;
+}
+
+.buttons button {
+  width: 30px;
+  height: 30px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+
+.buttons button.chosen {
+  background: yellow;
+}
+
+.text-box {
+  height: 100%;
+  background: #fff;
+  padding: 5px;
+  box-sizing: border-box;;
+  max-height: 450px;
+  overflow: auto;
+  caret-color: red;
+}

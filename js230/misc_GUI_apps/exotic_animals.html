@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <title>Exotic Animals</title>
+    <style>
+      figcaption {
+        transition: visibility 1s, opacity 0.5s;
+      }
+
+      figcaption {
+        visibility: hidden;
+        opacity: 0;
+      }
+
+      figcaption.show {
+        visibility: visible;
+        opacity: 1;
+      }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <script>
+      /*
+      // animal data with img url and caption
+      //  {bird: {url: /xxx/, caption: wefwef}, cat: {}}
+      - template for each image and caption
+      */
+
+      let animalImags = [
+        {url: 'https://via.placeholder.com/150', name: 'animal#1', description: "Animal 1's image"},
+        {url: 'https://via.placeholder.com/150/FF0000', name: 'animal#2', description: "Animal 2's image"},
+        {url: 'https://via.placeholder.com/150/0000FF', name: 'animal#3', description: "Animal 3's image"}
+      ]
+
+      
+
+
+      document.addEventListener('DOMContentLoaded', () => {
+        let div = document.querySelector('div');
+
+        function templateImages() {
+        let animalTemplate = Handlebars.compile(document.querySelector('#animalTemplate').innerHTML);
+        div.insertAdjacentHTML("beforeend", animalTemplate({animals: animalImags}));
+      }
+
+       
+        templateImages();
+
+        div.addEventListener('mouseover', event => {
+          let img = event.target;
+          let figcaption = img.nextElementSibling;
+
+          if (img.tagName === 'IMG') {
+            let timeoutID = setTimeout(function() {
+              figcaption.classList.add('show');
+            }, 2000);
+
+            img.addEventListener('mouseout', event => {
+              clearTimeout(timeoutID);
+              figcaption.classList.remove('show');
+            });
+          }
+        });
+      });
+
+
+      
+    </script>
+  </head>
+  <body>
+    <h1>Exotic Animals</h1>
+    <div id='animals'>
+      <figure>
+        <img src="https://via.placeholder.com/150" alt="animal#1" />
+        <figcaption>Animal 1's image</figcaption>
+      </figure>
+      <figure>
+        <img src="https://via.placeholder.com/150/FF0000" alt="animal#2" />
+        <figcaption>Animal 2's image</figcaption>
+      </figure>
+      <figure>
+        <img src="https://via.placeholder.com/150/0000FF" alt="animal#3" />
+        <figcaption>Animal 3's image</figcaption>
+      </figure>
+    </div>
+    <script id='animalTemplate' type='text/x-handlebars'>
+      {{#each animals}}
+      <figure>
+        <img src="{{url}}" alt="{{name}}"/>
+        <figcaption>{{description}}</figcaption>
+      </figure>
+      {{/each}}
+    </script>
+  </body>
+</html>

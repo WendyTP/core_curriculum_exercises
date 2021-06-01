@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Car Shop with Smart Select</title>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <style>
+      body {
+        margin: 0px;
+        background: lightgrey;
+      }
+
+      header {
+        background-color: rgb(59,41,91);
+        color: #fff;
+        padding: 10px;
+      }
+
+      h1 {
+       margin: 0px;
+       padding-bottom: 10px;
+      }
+
+      select {
+        width: 80px;
+        background: transparent;
+        color: #fff;
+        border: 1px solid #fff;
+        border-radius: 5px;
+        margin: 0 5px 0 5px;
+        padding: 5px;
+      }
+
+      option {
+        background: rgb(59,41,91);
+      }
+
+      button {
+        width: 50px;
+        background: transparent;
+        color: #fff;
+        border: 1px solid #fff;
+        border-radius: 5px;
+        margin-left: 20px;
+        padding: 5px;
+      }
+
+     
+      div.car {
+        display: inline-block;
+        width: 200px;
+        margin: 15px 5px 10px 5px;
+        box-sizing: border-box;
+      }
+
+      .car h2 {
+        font-size: 20px;
+        margin-top: 10px;
+        margin-bottom: 5px;
+      }
+
+      .car p {
+        margin-top: 5px;
+        margin-bottom: 0px;
+      }
+
+      .car a {
+        display: inline-block;
+        margin-top: 5px;;
+        padding: 10px;
+        text-decoration: none;
+        background: rgb(59,41,91);
+        color: #fff;
+        border-radius: 5px;
+      }
+
+      .hide {
+        display: none;
+      }
+
+    </style>
+    <script>
+      let cars = [
+      { make: 'Honda', image: 'https://via.placeholder.com/150/ce5c5c', model: 'Accord', year: 2005, price: 7000 },
+      { make: 'Honda', image: 'https://via.placeholder.com/150/5cce84', model: 'Accord', year: 2008, price: 11000 },
+      { make: 'Toyota', image: 'https://via.placeholder.com/150/5c60ce', model: 'Camry', year: 2009, price: 12500 },
+      { make: 'Toyota', image: 'https://via.placeholder.com/150/ce965c', model: 'Corolla', year: 2016, price: 15000 },
+      { make: 'Suzuki', image: 'https://via.placeholder.com/150/ce5cab', model: 'Swift', year: 2014, price: 9000 },
+      { make: 'Audi', image: 'https://via.placeholder.com/150/82d8dc', model: 'A4', year: 2013, price: 25000 },
+      { make: 'Audi', image: 'https://via.placeholder.com/150/262a2d', model: 'A4', year: 2013, price: 26000 },
+      ];
+   
+
+      /*
+      (before clicking filter btn)
+      Make: toyota -> model: all + toyata model  (showing all)
+      Make: all -> model: all + all models
+      */
+      document.addEventListener('DOMContentLoaded', () => {
+        let filtersDiv = document.querySelector('#filters');
+        let carsDiv = document.querySelector('#cars');
+
+        let RenderPageContent = {
+
+          init: function() {
+            this.templates = this.createTemplates();
+            this.carFilters = this.retrieveCarFilters();
+            this.registerPartials();
+            this.renderFilters();
+            this.renderMainContent();
+          },
+
+          retrieveCarFilters: function() {
+            let resultObj = {};
+          
+            Object.keys(cars[0]).forEach(key => {
+              if (key !== 'image') {
+                resultObj[key] = [];
+              }
+            });
+
+            let resultObjKeys = Object.keys(resultObj)  // [make, image, model, ]
+
+            cars.forEach(car => {
+              resultObjKeys.forEach(key => {
+                if (!resultObj[key].includes(car[key])) {
+                  resultObj[key].push(car[key]);
+                }
+              });
+            });
+
+            return resultObj;
+          },
+
+          createTemplates: function() {
+            let templates = {};
+            document.querySelectorAll('script[type="text/x-handlebars"]').forEach(temp => {
+              templates[temp.id] = Handlebars.compile(temp.innerHTML);
+            });
+            return templates;
+          },
+
+          registerPartials: function() {
+            document.querySelectorAll("[data-type=partial]").forEach(partial => {
+              Handlebars.registerPartial(partial.id, partial.innerHTML);
+            });
+          },
+
+          renderFilters: function() {
+            let filterTemplate = this.templates['filters_template'];
+            filtersDiv.insertAdjacentHTML('afterbegin', filterTemplate(this.carFilters));
+          },
+
+          renderMainContent: function() {
+            let mainTemplate = this.templates['cars_template'];
+            carsDiv.insertAdjacentHTML('afterbegin', mainTemplate({cars: cars}));
+          },
+        };
+
+        let FilterApp = {
+          init: function() {
+            this.bind();
+          },
+
+          bind: function() {
+            filtersDiv.addEventListener('click', this.narrowDownModelSelections.bind(this));
+            document.addEventListener('click', this.generateFilteredCars.bind(this));
+          },
+
+          narrowDownModelSelections: function(event) {
+            event.preventDefault();
+            if (event.target.tagName === 'SELECT') {
+              if (event.target.name === 'make') {
+                let makeOption = event.target.value;
+                let modelSelect = document.querySelector('select[name="model"]');
+                let modelOptions = modelSelect.children;
+                this.showAllModels(modelOptions);
+                this.resetModelSelectedValue(modelSelect, modelOptions);
+                let modelList = this.filterCarModels(makeOption);
+                this.hideOptions(modelList, modelOptions);
+              }
+            }
+          },
+
+          filterCarModels: function(makeOption) {
+            let selectedCars;
+            if (makeOption === 'All') {
+              selectedCars = cars;
+            } else {
+              selectedCars = cars.filter(car => {
+                return car['make'] === makeOption;
+              });
+            }
+
+            return selectedCars.map(car => {
+              return car.model;
+            });
+          },
+
+          hideOptions: function(list, modelOptions) {
+            for (let idx = 0; idx < modelOptions.length; idx += 1) {
+              let option = modelOptions[idx];
+              if (option.value !== 'All') {
+                if (!list.includes(option.value)) {
+                  option.classList.add('hide');
+                }
+              }
+            }
+          },
+
+          showAllModels: function(modelOptions) {
+            for (let idx = 0; idx < modelOptions.length; idx += 1) {
+              let option = modelOptions[idx];
+              option.classList.remove('hide');
+            }
+          },
+
+          resetModelSelectedValue: function(modelSelect, modelOptions) {
+            modelSelect.value = modelOptions[0].value;
+          },
+
+          generateFilteredCars: function(event) {
+            event.preventDefault();
+            if (event.target.tagName === 'BUTTON') {
+              this.removeAlhiddenCars();
+              let selects = document.querySelectorAll('select');
+              let filters = this.generateFilters(selects);
+              let cars = document.querySelectorAll('.car');
+              this.filterCars(cars, filters);
+            }
+          },
+
+          removeAlhiddenCars: function() {
+            document.querySelectorAll('div.hide').forEach(element => {
+              element.classList.replace('hide', 'car');
+            })
+          },
+
+          generateFilters: function(selects) {
+            let resultObj = {};
+            selects.forEach(select => {
+              resultObj[select.name] = select.value;
+            });
+            
+            return resultObj;
+          },
+
+          filterCars: function(carDivs, filters) {
+            carDivs.forEach(carDiv => {
+              let carToBeDisplayed = this.filterCar(carDiv, filters);
+              if (!carToBeDisplayed) {
+                this.hideCar(carDiv);        
+              }
+            });
+          },
+
+          filterCar: function(carDiv, filters) {
+            let validCar = false;
+            let carInfo = this.retrieveCarInfo(carDiv); // {make: hoda, model: accord, year: 2005, price: 7000}
+            
+            // filters: {make: all, model: accord, ...}
+            let filterKeys = Object.keys(filters);
+            for (let idx = 0; idx < filterKeys.length; idx += 1) {
+              let key = filterKeys[idx];
+
+              if (filters[key] === 'All' || filters[key] === 'Any') {
+                continue;
+              } else if (carInfo[key] !== filters[key]){
+                return validCar;
+              }
+            }
+
+            validCar = true;
+            return validCar;
+          },
+
+          hideCar: function(carDiv) {
+            carDiv.classList.replace('car', 'hide');
+          },
+
+          retrieveCarInfo: function(carDiv) {
+            let carInfo = {};
+            [carInfo['make'], carInfo['model']] = carDiv.querySelector('h2').textContent.split(' ');
+            carDiv.querySelectorAll('p').forEach(p => {
+              carInfo[p.getAttribute('class')] = p.textContent.split(': ')[1];
+            });
+            return carInfo;
+          }
+        }
+
+        RenderPageContent.init();
+        FilterApp.init();
+        
+      });
+    </script>
+  </head>
+  <body>
+    <header>
+      <h1>Buy Used Cars</h1>
+      <div id='filters'></div>
+    </header>
+    <main>
+      <div id='cars'></div>
+    </main>
+    <script id='filters_template' type='text/x-handlebars'>
+      <label for='make'>Make</label>
+      <select name='make' id='make'>
+        <option value='All'>All</option>
+        {{#each make}}
+          <option value='{{this}}'>{{this}}</option>
+        {{/each}}
+
+      </select>
+      <label for='model'>Model</label>
+      <select name='model' id='model'>
+        <option value='All'>All</option>
+        {{#each model}}
+          <option value='{{this}}'>{{this}}</option>
+        {{/each}}
+      </select>
+      <label for='price'>Price</label>
+      <select name='price' id='price'>
+        <option value='Any'>Any</option>
+        {{#each price}}
+          <option value='{{this}}'>{{this}}</option>
+        {{/each}}
+      </select>
+      <label for='year'>Year</label>
+      <select name='year' id='year'>
+        <option value='Any'>Any</option>
+        {{#each year}}
+          <option value='{{this}}'>{{this}}</option>
+        {{/each}}
+      </select>
+      <button class='filter_btn'>Filter</button>
+    </script>
+    <script id='cars_template' type='text/x-handlebars'>
+      {{#each cars}}
+        {{> car_template}}
+      {{/each}}
+    </script>
+    <script id='car_template' type="text/x-handlebars" data-type="partial">
+      <div class='car'>
+        <img src='{{image}}' alt='{{make}} {{model}}'/>
+        <h2>{{make}} {{model}}</h2>
+        <p class='year'>Year: {{year}}</p>
+        <p class='price'>Price: {{price}}</p>
+        <a href='#'>Buy</a>
+      </div>
+    </script>
+  </body>
+</html>
