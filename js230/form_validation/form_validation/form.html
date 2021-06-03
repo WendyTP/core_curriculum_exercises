@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang='en'>
+  <head>
+    <title>Sign up Form</title>
+    <script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+    <link rel="stylesheet" href='style.css'/>
+    <script src='main.js'></script>
+  </head>
+  <body>
+    <h1>Sign Up Form</h1>
+    
+    <form action='#' method='post' novalidate>
+      <p class="form-error"></p>
+      <dl>
+        <dt><label for="first-name">First Name</label></dt>
+        <dd>
+          <input type="text" id="first-name" name="first-name" required/>
+          <span class='error-message'></span>
+        </dd>
+        
+      </dl>
+      <dl>
+        <dt><label for="last-name">Last Name</label></dt>
+        <dd>
+          <input type="text" id="last-name" name="last-name" required/>
+          <span class='error-message'></span>
+        </dd>
+        
+      </dl>
+      <dl>
+        <dt><label for="email">Email</label></dt>
+        <dd>
+          <input type="text" id="email" name="email" placeholder="someone@example.com" pattern=".+@.+" required/>
+          <span class='error-message'></span>
+        </dd>
+        
+      </dl>
+      <dl>
+        <dt><label for="password">Password</label></dt>
+        <dd>
+          <input type="password" id="password"" name="password"" minlength="10" required/>
+          <span class='error-message'></span>
+        </dd>
+        
+      </dl>
+      <dl>
+        <dt><label for="phone">Phone</label></dt>
+        <dd>
+          <input type="text" id="phone" name="phone" placeholder="111-222-3333" pattern="\d{3}-\d{3}-\d{4}"/>
+          <span class='error-message'></span>
+        </dd>
+        
+      </dl>
+      <input type="submit" value='Sign Up'/>
+    </form>
+  </body>
+</html>
